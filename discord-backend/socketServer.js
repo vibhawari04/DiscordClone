@@ -1,0 +1,60 @@
+const authSocket = require("./middleware/authSocket");
+const newConnectionHandler = require("./socketHandlers/newConnectionHandler");
+const disconnectHandler = require("./socketHandlers/disconnectHandler");
+const serverStore = require("./serverStore");
+const directMessageHandler = require("./socketHandlers/directMessageHandler");
+const directChatHistoryHandler = require("./socketHandlers/directChatHistoryHandler");
+
+const registerSocketServer = (server) => {
+  console.log("andar bhi aara hai soket server me?");
+  const io = require("socket.io")(server, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+    },
+  });
+
+  serverStore.setSocketServerInstance(io);
+
+  // use middleware
+  io.use((socket, next) => {
+    console.log("auth socket");
+    authSocket(socket, next);
+  });
+
+  const emitOnlineUsers = () => {
+    const onlineUsers = serverStore.getOnlineUsers();
+    console.log("online sers ", onlineUsers);
+    io.emit("online-users", { onlineUsers });
+  };
+
+  io.on("connection", (socket) => {
+    console.log("user connected");
+    console.log(socket.id);
+
+    // new connection handler
+    newConnectionHandler(socket, io);
+
+    emitOnlineUsers();
+
+    socket.on("direct-message", (data) => {
+      directMessageHandler(socket, data);
+    });
+
+    socket.on("direct-chat-history", (data) => {
+      directChatHistoryHandler(socket, data);
+    });
+    socket.on("disconnect", () => {
+      disconnectHandler(socket);
+    });
+  });
+
+  console.log("io dikh raha hai 2 ");
+
+  setInterval(() => {
+    emitOnlineUsers();
+  }, [1000 * 8]);
+};
+module.exports = {
+  registerSocketServer,
+};
