@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
@@ -21,3 +22,12 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+=======
+node_modules/
+.env
+dist/
+build/
+.vscode/
+discord-backend/.env
+discord-frontend/.env
+>>>>>>> 5f145e65fd85c34b2e9c55cd00e3a5aa2634d6bd
